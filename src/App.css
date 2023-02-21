@@ -29,8 +29,3 @@ th{
   padding: 1px !important;
   font-size: 13px;
 }
-.pagination{
-  display: grid;
-  grid-template-columns: repeat(auto-fill, min-max(1fr, 2%));
-  max-width: 100%;
-}
