@@ -1,36 +1,61 @@
 import './App.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Table } from 'react-bootstrap';
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 import Data from './data.json'
+import axios from 'axios';
+import Loader from 'lodash';
 
+const pageSize = 200;
 function App() {
   const [State, setState] = useState(Data)
   const [data, setData] = useState("");
+  const [currentPage, setCurrentPage] = useState(1)
+  const [paginatedPosts, setPaginatedPosts] = useState()
   // const columns = [
   //   { dataField: 'id', text: 'ID' },
-  //   { dataField: 'name', text: 'Name' },
-  //   { dataField: 'age', text: 'Age' },
-  //   { dataField: 'college', text: 'College' },
-  //   { dataField: 'city', text: 'City' },
-  //   { dataField: 'college_city', text: 'College City' },
-  //   { dataField: 'hometown', text: 'Hometown' },
-  //   { dataField: 'currentTown', text: 'CurrentTown' },
-  //   { dataField: 'hobbies', text: 'Hobbies' },
-  //   { dataField: 'jobRole', text: 'Job Role' },
-  //   { dataField: 'company', text: 'Company' },
-  //   { dataField: 'companyLocation', text: 'Company Location' },
-  //   { dataField: 'projectLeader', text: 'Project Leader' },
-  //   { dataField: 'teamLeader', text: 'Team Leader' },
-  //   { dataField: 'supervisor', text: 'Supervisor' },
+  //   { dataField: 'title', text: 'title' },
+  //   { dataField: 'description', text: 'description' },
+  //   { dataField: 'location', text: 'location' },
+  //   { dataField: 'lng', text: 'lng' },
+  //   { dataField: 'lat', text: 'lat' },
+  //   { dataField: 'userId', text: 'userId' },
+  //   { dataField: 'name', text: 'name' },
+  //   { dataField: 'isdeleted', text: 'isdeleted' },
+  //   { dataField: 'videoUrl', text: 'videoUrl' },
+  //   { dataField: 'images', text: 'images' },
+  //   { dataField: 'mediatype', text: 'mediatype' },
+  //   { dataField: 'imagePaths', text: 'imagePaths' },
+  //   { dataField: 'feedsComment', text: 'feedsComment' },
+  //   { dataField: 'commentCount', text: 'commentCount' },
+  //   { dataField: 'createdAt', text: 'createdAt' },
+  //   { dataField: 'code', text: 'code' },
+  //   { dataField: 'msg', text: 'msg' },
   // ];
-  // console.log(data, "Dataaaaa");
-  const paginationOptions = {
-    sizePerPage: 15,  // number of rows to show per page
-    hideSizePerPage: true,  // hide the option to change number of rows per page
-    hidePageListOnlyOnePage: true,  // hide pagination controls when there is only one page
-  };
+  // // console.log(data, "Dataaaaa");
+  // const paginationOptions = {
+  //   sizePerPage: 100,  // number of rows to show per page
+  //   hideSizePerPage: true,  // hide the option to change number of rows per page
+  //   hidePageListOnlyOnePage: true,  // hide pagination controls when there is only one page
+  // };
+  
+  useEffect(() => {
+    axios.get("https://jsonplaceholder.typicode.com/photos").then((res) => {
+      setState(res.data);
+      setPaginatedPosts(Loader(State).slice(0).take(pageSize).value());
+    })
+  }, [])
+  // 
+  const pageCount = State ? Math.ceil(State.length / pageSize) : 0;
+  if (pageCount === 1) return null;
+  const pages = Loader.range(1, pageCount + 1);
+  const pagination = (page) => {
+    setCurrentPage(page);
+    const startIndex = (page - 1) * pageSize;
+    const paginatePost = Loader(State).slice(startIndex).take(pageSize).value();
+    setPaginatedPosts(paginatePost);
+  } 
   return (
     <div className="App">
       <div className="navBar">
@@ -44,7 +69,7 @@ function App() {
         </div>
 
         <div style={{ minWidth: '85%' }}>
-          <p>Get the result here: <span style={{fontWeight: "bold"}}>{data}</span></p>
+          <p>Get the result here: <span style={{ fontWeight: "bold" }}>{data}</span></p>
           <div className="my-Table">
             {/* <BootstrapTable
               keyField="id"
@@ -54,48 +79,44 @@ function App() {
               
             /> */}
             <Table responsive bordered>
-            <thead>
+              <thead>
                 <tr>
-                  <th>S.NO</th>
-                  <th>name</th>
-                  <th>age</th>
-                  <th>college</th>
-                  <th>city</th>
-                  <th>college_city</th>
-                  <th>hometown</th>
-                  <th>hobbies</th>
-                  <th>jobRole</th>
-                  <th>company</th>
-                  <th>companyLocation</th>
-                  <th>projectLeader</th>
-                  <th>teamLeader</th>
-                  <th>supervisor</th>
+                  <th>ID</th>
+                  <th>Post ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Body</th>
                 </tr>
               </thead>
               <tbody>
                 {
-                  State.map((obj, i) => (
+                  paginatedPosts.map((obj, i) => (
                     <tr key={i}>
-                      <td onClick={(e) => setData(obj.id)}>{obj.id}</td>
-                      <td onClick={(e) => setData(obj.name)}>{obj.name}</td>
-                      <td onClick={(e) => setData(obj.age)}>{obj.age}</td>
-                      <td onClick={(e) => setData(obj.college)}>{obj.college}</td>
-                      <td onClick={(e) => setData(obj.city)}>{obj.city}</td>
-                      <td onClick={(e) => setData(obj.college_city)}>{obj.college_city}</td>
-                      <td onClick={(e) => setData(obj.hometown)}>{obj.hometown}</td>
-                      <td onClick={(e) => setData(obj.hobbies)}>{obj.hobbies}</td>
-                      <td onClick={(e) => setData(obj.jobRole)}>{obj.jobRole}</td>
-                      <td onClick={(e) => setData(obj.company)}>{obj.company}</td>
-                      <td onClick={(e) => setData(obj.companyLocation)}>{obj.companyLocation}</td>
-                      <td onClick={(e) => setData(obj.projectLeader)}>{obj.projectLeader}</td>
-                      <td onClick={(e) => setData(obj.teamLeader)}>{obj.teamLeader}</td>
-                      <td onClick={(e) => setData(obj.supervisor)}>{obj.supervisor}</td>
-                    </tr>
+                      <td onClick={() => setData(obj.id)}>{obj.id}</td>
+                      <td onClick={() => setData(obj.albumId)}>{obj.albumId}</td>
+                      <td onClick={() => setData(obj.title)}>{obj.title}</td>
+                      <td onClick={() => setData(obj.url)}>{obj.url}</td>
+                      <td onClick={() => setData(obj.thumbnailUrl)}>{obj.thumbnailUrl}</td>
+                      </tr>
                   ))
                 }
               </tbody>
             </Table>
           </div>
+          <nav className='d-flex justify-content-center'>
+            <ul className="pagination">
+              {
+                pages.map((page) => (
+                  <li className={
+                    page === currentPage ? "page-item active" : "page-item"
+                  } style={{cursor: "pointer"}}>
+                    <p className="page-link"
+                    onClick={() => pagination(page)}>{page}</p>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
         </div>
       </div>
 
